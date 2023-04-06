@@ -5,7 +5,10 @@ use bevy::prelude::*;
 pub struct MenuPlugin;
 impl Plugin for MenuPlugin {
     fn build(&self, app: &mut App) {
-        app.add_system(setup_menu.in_schedule(OnEnter(GameState::Menu)))
+        app
+            //进入菜单界面，产生MenuEntity
+            .add_system(setup_menu.in_schedule(OnEnter(GameState::Menu)))
+            //离开菜单 销毁 MenuEntity
             .add_system(cleanup::<MenuEntity>.in_schedule(OnExit(GameState::Menu)))
             .add_system(
                 start_playing

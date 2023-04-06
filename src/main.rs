@@ -36,13 +36,15 @@ fn main() {
                     }),
                     ..default()
                 })
-                .set(ImagePlugin::default_nearest()),
+                .set(ImagePlugin::default_nearest())
+                ,
         )
         .add_state::<GameState>()
-        .add_system(scene_setup.on_startup())
+        .add_startup_system(scene_setup)
+        .add_plugin(menu::MenuPlugin)
         .add_plugin(game::GamePlugin)
         .add_plugin(game_over::GameOverPlugin)
-        .add_plugin(menu::MenuPlugin)
+
         .run();
 }
 
@@ -64,12 +66,15 @@ fn scene_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn(Camera2dBundle::default());
 
     // Spawn the background sprite
+    // 背景不动
     commands.spawn(SpriteBundle {
         texture: asset_server.load("sprites/background.png"),
         ..Default::default()
     });
 
     // Spawn 2 ground sprites so that they can scroll infinitely
+    // 地面滚动
+    // 整体游戏界面288 地面图形336
     let texture_handle = asset_server.load("sprites/ground.png");
     for i in 0..2 {
         commands.spawn((

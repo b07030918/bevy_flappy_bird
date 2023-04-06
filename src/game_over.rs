@@ -2,6 +2,7 @@ use crate::{cleanup, has_user_input, GameState, UI_Z};
 use bevy::prelude::*;
 
 pub struct GameOverPlugin;
+
 impl Plugin for GameOverPlugin {
     fn build(&self, app: &mut App) {
         app.add_system(setup_game_over.in_schedule(OnEnter(GameState::GameOver)))

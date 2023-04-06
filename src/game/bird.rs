@@ -3,15 +3,19 @@ use bevy::prelude::*;
 
 #[derive(Component, Default)]
 pub struct Bird {
+    //速率
     velocity: f32,
 }
 
+//向上的速度
 pub(super) fn jump(mut bird: Query<&mut Bird>) {
     for mut bird in &mut bird {
+        //向上
         bird.velocity = JUMP_AMOUNT;
     }
 }
 
+//自由下落的速度，最大FALL_VELOCITY_LIMIT（-0.5）
 pub(super) fn fall(mut bird: Query<&mut Bird, With<Bird>>, time: Res<Time>) {
     for mut bird in &mut bird {
         bird.velocity -= FALL_SPEED * time.delta_seconds();

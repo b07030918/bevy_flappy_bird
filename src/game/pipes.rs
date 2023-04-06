@@ -24,6 +24,7 @@ pub(super) fn spawn_pipe(
 
     let texture = asset_server.load("sprites/pipe.png");
 
+    //下半部分水管
     commands.spawn((
         Pipe,
         ApproachingPipe,
@@ -36,6 +37,7 @@ pub(super) fn spawn_pipe(
         },
     ));
 
+    
     commands.spawn((
         Pipe,
         Scroll,

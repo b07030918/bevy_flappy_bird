@@ -8,14 +8,14 @@ mod bird;
 mod pipes;
 
 const SCROLL_SPEED: f32 = 50.0;
-const JUMP_AMOUNT: f32 = 1.5;
+const JUMP_AMOUNT: f32 = 0.8;
 const FALL_SPEED: f32 = 5.0;
-const FALL_VELOCITY_LIMIT: f32 = -2.0;
+const FALL_VELOCITY_LIMIT: f32 = -0.5;
 const MOVE_SPEED: f32 = 200.0;
 const DEATH_HEIGHT: f32 = -125.0;
 const PIPE_SPAWN_OFFSET: f32 = 180.0;
 const PIPE_SPAWN_TIME: f32 = 4.0;
-const GAP_HEIGHT: f32 = 100.0;
+const GAP_HEIGHT: f32 = 150.0;
 const BIRD_ANIMATION_SPEED: f32 = 10.0;
 
 #[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, States)]
@@ -26,6 +26,7 @@ enum PlayState {
 }
 
 pub struct GamePlugin;
+
 impl Plugin for GamePlugin {
     fn build(&self, app: &mut App) {
         app.add_state::<PlayState>()
@@ -34,42 +35,55 @@ impl Plugin for GamePlugin {
                 PIPE_SPAWN_TIME,
                 TimerMode::Repeating,
             )))
+            //鸟、分的ui
             .add_system(game_setup.in_schedule(OnEnter(GameState::Playing)))
-            .add_systems(
-                (hit_sound, reset_score, reset_timer).in_schedule(OnExit(GameState::Playing)),
-            )
+            //离开游戏，鸟碰撞的声音、分数和时间置零
+            .add_systems((
+                hit_sound, 
+                reset_score, 
+                reset_timer,
+            ).in_schedule(OnExit(GameState::Playing)))
+
+            //鸟撞击的声音
             .add_system(hit_sound.in_schedule(OnEnter(PlayState::HitPipe)))
+
             .add_systems(
                 (
                     // Bird
+                    // 鸟动画
                     bird::animate_bird,
+                    // 点击给鸟向上的跳跃
                     bird::jump.run_if(has_user_input),
                     // Pipes
-                    pipes::check_passed_pipe,
-                    pipes::check_pipe_collision,
+                    // 生成管道
                     pipes::spawn_pipe,
+                    // 销毁管道
                     pipes::despawn_pipe,
+                    // 检查通过
+                    pipes::check_passed_pipe,
+                    // 检查不通过
+                    pipes::check_pipe_collision,
                     // Sound
                     flap_sound.run_if(has_user_input),
                     point_sound.run_if(resource_changed::<Score>()),
                     // Other
+                    // 更新比分
                     update_score_text,
                     scroll,
                     reuse_ground,
-                )
-                    .in_set(OnUpdate(GameState::Playing))
-                    .in_set(OnUpdate(PlayState::Normal)),
+                ).in_set(OnUpdate(GameState::Playing)).in_set(OnUpdate(PlayState::Normal)),
             )
+
             .add_systems(
                 // These will cotinue running after a pipe is hit
                 (
                     // Bird
                     bird::fall,
+                    // 更新Y轴坐标
                     bird::move_bird,
                     // Other
                     check_death,
-                )
-                    .in_set(OnUpdate(GameState::Playing)),
+                ).in_set(OnUpdate(GameState::Playing)),
             );
     }
 }
@@ -118,8 +132,7 @@ fn game_setup(
     ));
 
     // Spawn the score UI
-    commands
-        .spawn((
+    commands.spawn((
             DespawnOnReset,
             NodeBundle {
                 style: Style {
